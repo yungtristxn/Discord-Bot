@@ -30,8 +30,8 @@ def picConverter(ctx):
     urllib.request.install_opener(opener)
 
     # downloading the image and converting it to png
-    filename = rf"{dir_path}\Media\temp\{ctx.author.name}.webp"
-    new_filename = rf"{dir_path}\Media\temp\{ctx.author.name}.png"
+    filename = rf"{dir_path}\Media\{ctx.author.name}.webp"
+    new_filename = rf"{dir_path}\Media\{ctx.author.name}.png"
     attachment_url = str(ctx.message.attachments[0].url)
     im = urllib.request.urlretrieve(attachment_url, filename)
     im = Image.open(filename)
@@ -183,7 +183,7 @@ class Bot():
 
         # pasting the template onto the given image to create a really funny meme
         im1.paste(im2, (0, 0), im2)
-        finalpath = rf'{dir_path}\Media\temp\BakedMeme.png'
+        finalpath = rf'{dir_path}\Media\BakedMeme.png'
 
         # saving and sending the merged image
         im1.save(finalpath)
@@ -199,7 +199,7 @@ class Bot():
         im1 = im1.resize((635, 586))
         im2.paste(im1, (650, 135), im1)
 
-        finalpath = rf'{dir_path}\Media\temp\BakedMeme2.png'
+        finalpath = rf'{dir_path}\Media\BakedMeme2.png'
 
         # saving and sending the merged image
         im2.save(finalpath)
@@ -215,7 +215,7 @@ class Bot():
         # resizing given image to fit to meme tp
         im1 = im1.resize((165, 220))
         im2.paste(im1, (55, 80), im1)
-        finalpath = rf'{dir_path}\Media\temp\BakedMeme3.png'
+        finalpath = rf'{dir_path}\Media\BakedMeme3.png'
 
         # saving and sending the merged image
         im2.save(finalpath)
