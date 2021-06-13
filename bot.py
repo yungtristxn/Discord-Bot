@@ -20,11 +20,10 @@ intents = discord.Intents.default()
 intents.members = True
 
 # sets the command prefix for bot commands
-bot = commands.Bot(command_prefix='-',intents=intents)
+bot = commands.Bot(command_prefix='-', intents=intents)
 
 
 def picConverter(ctx):
-
     # building the opener to download user avatar
     opener = urllib.request.build_opener()
     opener.addheaders = [
@@ -43,6 +42,7 @@ def picConverter(ctx):
     os.remove(new_filename)
     return im
 
+
 def listTo2dArray(list):
     n = 0
     visual = '```'
@@ -57,27 +57,24 @@ def listTo2dArray(list):
             visual += f'| {x} '
 
     visual += '```'
-    embed = discord.Embed(title='Wildus-Game-Bot', color=0x00ff00, timestamp=datetime.datetime.utcnow())
-    embed.add_field(name='**Tic-Tac-Toe**',value=f'{visual}')
+    embed = discord.Embed(title='Wildus-Game-Bot',
+                          color=0x00ff00, timestamp=datetime.datetime.utcnow())
+    embed.add_field(name='**Tic-Tac-Toe**', value=f'{visual}')
     return embed
-
-        
-    
 
 
 class Bot():
     # initializing bot variables
     def __init__(self):
         self.bot = bot
-        self.gary_channel_id = [563024724612087829,
+        self.bot_channel_ids = [563024724612087829,
                                 746945705142124596,
                                 826223294243012659,
                                 746945705142124596,
                                 852236803079798784]
-        self.deleted_gary_id = 832018754874769448
+        self.deleted_messages_channel_id = 832018754874769448
 
     # sets the activity and shows all connected servers on bot startup
-
     @bot.event
     async def on_ready():
         await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name='Tristan beim scheißen zu'))
@@ -89,9 +86,9 @@ class Bot():
     # Function that is called on every message
     @bot.event
     async def on_message(message, self=bot):
-        # checking if message is a command sent to gary [. in front of message] and if it is send into one of gary's channels
-        if message.content.startswith('-') and message.channel.id not in self.gary_channel_id:
-            backupchannel = bot.get_channel(self.deleted_gary_id)
+        # checking if message is a command and if true, checking if it is sent into one of the given botchannels, if not the message is deleted and logged in deleted_messages_channel
+        if message.content.startswith('-') and message.channel.id not in self.bot_channel_ids:
+            backupchannel = bot.get_channel(self.deleted_messages_channel_id)
             # creating the embed message that contains the deleted command, the author and the server it was sent on
             deletedMessage = discord.Embed(
                 title='Overwatch', color=0x00ff00, timestamp=datetime.datetime.utcnow())
@@ -113,42 +110,37 @@ class Bot():
         else:
             await bot.process_commands(message)
 
-    # sends the current daytime???
+    # sends the current daytime
     @bot.command(pass_context=True)
-    async def time(ctx, self=bot):
+    async def time(ctx):
         time = str(datetime.datetime.now())[:19]
         await ctx.send(time)
 
     # get guild icon
     @bot.command()
-    async def geticon(ctx, self=bot):
+    async def geticon(ctx):
         try:
             guild = ctx.author.guild
             await ctx.send(guild.icon_url)
         except discord.errors.HTTPException:
             await ctx.send('This server has no icon!')
 
-    # Leaving the voice channel
-    @bot.command()
-    async def leave(ctx):
-        await ctx.voice_client.disconnect()
-
     # Shutdown the bot, owner only
     @bot.command(pass_context=True)
     async def shutdown(ctx):
         is_owner = await bot.is_owner(ctx.author)
         if is_owner == False:
-            await ctx.send('Du besitzt nicht die nötigen Rechte um das zu tun!')
+            await ctx.send("You don't have the permissions to use this command!")
         else:
             await ctx.send(f'Wildus Bot shutting down...')
             await bot.logout()
 
     # leave server the bot is on, owner only
     @bot.command(pass_context=True)
-    async def GoodbyeGary(ctx):
+    async def leave_server(ctx):
         is_owner = await bot.is_owner(ctx.author)
         if is_owner == False:
-            await ctx.send('Du besitzt nicht die nötigen Rechte um das zu tun!')
+            await ctx.send("You don't have the permissions to use this command!")
         else:
             await ctx.guild.leave()
 
@@ -160,7 +152,7 @@ class Bot():
                 limit = int(arg)
             else:
                 limit = None
-            channel = bot.get_channel(self.deleted_gary_id)
+            channel = bot.get_channel(self.deleted_messages_channel_id)
             deletedMessage = discord.Embed(
                 title='Channel Purger', color=0x00ff00, timestamp=datetime.datetime.now())
             deletedMessage.add_field(
@@ -220,7 +212,7 @@ class Bot():
         im1 = picConverter(ctx)
         im2 = Image.open('E:\Code\Media\MemeTP3.jpg').convert("RGBA")
 
-        # resizing and pasting the images
+        # resizing given image to fit to meme tp
         im1 = im1.resize((165, 220))
         im2.paste(im1, (55, 80), im1)
         finalpath = r'E:\Code\Media\BakedMeme3.png'
@@ -238,98 +230,45 @@ class Bot():
         else:
             await ctx.send(ctx.author.avatar_url)
 
-    # using the encryption command
-    @bot.command(pass_content=True)
-    async def encrypt(ctx, *, arg, self=bot):
-        program = r'E:/Code/2021/encode_decode/encrypt_message.py'
-        subprocess.call(['python', program, arg])
-        encrypted_message_path = r'E:\Code\2021\encode_decode\encrypted_message.txt'
-        key_file = r'E:/Code/2021/encode_decode/key.key'
-        key_file_o = open(key_file, 'rb')
-        await ctx.send(f'Verschlüsselte Nachricht: ', file=discord.File(encrypted_message_path))
-        key = str(key_file_o.read())
-        await ctx.send(f'Key: {key}')
-        self.last_key = key
-        key_file_o.close()
-        os.remove(key_file)
-        os.remove(encrypted_message_path)
-
-    # using decryption command
-    @bot.command(pass_context=True)
-    async def decrypt(ctx, arg1, self=bot):
-
-        # program that will be called to decrypt the given text
-        program = r'E:/Code/2021/encode_decode/decrypt_message.py'
-
-        # downloading the sent file
-        attachment_url = ctx.message.attachments[0].url
-        file_request = requests.get(attachment_url)
-
-        if arg1 == 'lastkey' and self.last_key != None:
-            key = self.last_key
-        elif arg1 != 'lastkey':
-            key = arg1
-        elif arg1 == 'lastkey' and self.last_key == None:
-            await ctx.send('Letzter key ist nichtmehr verfügbar')
-
-        subprocess.call(['python', program, key, file_request.content])
-        decrypted_message_path = r'E:/Code/2021/encode_decode/decrypted_message.txt'
-        decrypted_message_path_o = open(decrypted_message_path, 'r')
-        await ctx.send(f'Entschlüsselte Nachricht: {decrypted_message_path_o.read()}')
-        decrypted_message_path_o.close()
-        os.remove(decrypted_message_path)
-
     # logs activity in voice channels
     @bot.event
-    async def on_voice_state_update(member, before, after, self=bot):
+    async def on_voice_state_update(member, before, after):
         send = False
         logchannel = bot.get_channel(832019802264305694)
-        if member.id == 282819211619729409 and before.channel == None and after.channel != None:
-            guild = member.guild
-            kick_channel = await guild.create_voice_channel("kick")
-            await member.move_to(kick_channel, reason="huanson")
-            await kick_channel.delete()
-        else:
-            try:
-                if after.channel.name == 'kick' or before.channel.name == 'kick':
-                    pass
-                else:
-                    if before.channel == after.channel:
-                        pass
-                    elif before.channel == None and after.channel != None:
-                        description = '**' + str(member.mention) + \
-                            ' ist ' + str(after.channel) + ' beigetreten**'
-                        send = True
-                    elif before.channel != None and after.channel == None:
-                        description = '**' + str(member.mention) + \
-                            ' hat ' + str(before.channel) + ' verlassen**'
-                        send = True
-                    elif before.channel != None and after.channel != None:
-                        description = '**' + str(member.mention) + ' ist von ' + str(
-                            before.channel) + ' zu ' + str(after.channel) + ' gewechselt**'
-                        send = True
-                    else:
-                        print(member.name, before.channel, after.channel)
-                    if send == True:
-                        log = discord.Embed(description=description,
-                                            color=0x00ff00, timestamp=datetime.datetime.utcnow())
-                        log.set_author(name=member, icon_url=member.avatar_url)
-                        log.set_footer(text=str(member.guild.name))
-                        await logchannel.send(embed=log)
-                        send = False
-            except AttributeError:
+        try:
+            if before.channel == after.channel:
                 pass
+            elif before.channel == None and after.channel != None:
+                description = f'**{member.mention} has joined {after.channel}**'
+                send = True
+            elif before.channel != None and after.channel == None:
+                description = f'**{member.mention} has left {before.channel}**'
+                send = True
+            elif before.channel != None and after.channel != None:
+                description = f'**{member.mention} went from {before.channel} to {after.channel}'
+                send = True
+            else:
+                pass
+            if send == True:
+                log = discord.Embed(description=description,
+                                    color=0x00ff00, timestamp=datetime.datetime.utcnow())
+                log.set_author(name=member, icon_url=member.avatar_url)
+                log.set_footer(text=str(member.guild.name))
+                await logchannel.send(embed=log)
+                send = False
+        except AttributeError:
+            pass
 
     @bot.command()
     async def mlist(ctx):
-        mlist = discord.Embed(description="**Memberliste**",
+        mlist = discord.Embed(description="**Memberlist**",
                               color=0x00ff00, timestamp=datetime.datetime.utcnow())
         mlist.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
         mlist.set_footer(text=str(ctx.author.guild.name))
-        
+
         for member in ctx.guild.members:
             mlist.add_field(
-                name=f'**{member.name}**', value=f'Mitglied seit: ```{str(member.joined_at)[:19]}```Benutzt Discord seit: ```{member.created_at}```', inline=True)
+                name=f'**{member.name}**', value=f'Joined Server: ```{str(member.joined_at)[:19]}```Joined Discord: ```{member.created_at}```', inline=True)
 
         await ctx.send(embed=mlist)
 
@@ -337,17 +276,17 @@ class Bot():
     async def ttt(ctx, user: discord.User = None):
         winner = None
         # all possible fields that can be chosen to place either an X or an O
-        availabe_number = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+        availabe_numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
         number_list = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
         channel = ctx.message.channel  # channel the game is going to be played in
         user1 = ctx.message.author.id   # user that started the game
-        user2 = user.id     # user that was tagged by the user that called the command
+        user2 = user.id     # tagged user
         userlist = [user1, user2]
-        
+
         # chooses a random user of the 2 that begins the round
         first_user = random.choice(userlist)
-        
-        ttt_array = await ctx.send(embed=listTo2dArray(number_list)) #transforming the list into a 2 dimensional array to be displayed properly
+
+        ttt_array = await ctx.send(embed=listTo2dArray(number_list))
         startmsg = await ctx.send(f"{bot.get_user(first_user).mention} beginnt mit X!")
         current_user = first_user
 
@@ -355,7 +294,6 @@ class Bot():
             userlist = [first_user, user2]
         else:
             userlist = [first_user, user1]
-
         x = 9
         y = 0
         while y < x:
@@ -367,18 +305,16 @@ class Bot():
                 await ctx.send(f"Deine Zeit ist ausgelaufen {bot.get_user(current_user).mention}!")
                 break
             await msg.delete()
-            if msg.content in availabe_number:
+            if msg.content in availabe_numbers:
                 if msg.content in number_list:
-
                     if userlist.index(current_user) == 0:
                         number_list[number_list.index(msg.content)] = "X"
                     else:
                         number_list[number_list.index(msg.content)] = "0"
 
-
                     await ttt_array.edit(embed=listTo2dArray(number_list))
                     y += 1
-                    availabe_number.remove(msg.content)
+                    availabe_numbers.remove(msg.content)
 
                 def checkRows(array):
                     for row in array:
@@ -407,9 +343,9 @@ class Bot():
                             return winner
                     else:
                         pass
-                
+
                 mdnumber_array = np.reshape(number_list, (-1, 3))
-                #checking if a winner exists, if winner is found ends the game and announces winner
+                # checking if a winner exists, if winner is found ends the game and announces winner
                 winCon1 = checkRows(mdnumber_array)
                 winCon2 = checkDiagonals(mdnumber_array)
                 if winCon1:
@@ -420,7 +356,8 @@ class Bot():
                     await startmsg.delete()
                     await ctx.send(f"{bot.get_user(winner).mention} hat gewonnen!")
                     break
-                if userlist.index(current_user) == 0: #changing the user whose turn it is
+                # changing the user whose turn it is
+                if userlist.index(current_user) == 0:
                     current_user = userlist[1]
                 else:
                     current_user = userlist[0]
@@ -434,9 +371,10 @@ class Bot():
             error = await ctx.send(f"Die Stelle {msg.content} gibt es nicht!")
             await asyncio.sleep(2)
             await error.delete()
-            
+
         if not winner:
             await ctx.send("Das Spiel ist vorbei und keiner hat gewonnen!")
+
 
 # initializes with file execution
 if __name__ == '__main__':
