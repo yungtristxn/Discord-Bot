@@ -3,8 +3,6 @@ from discord.ext import commands
 import asyncio
 import datetime
 from discord.ext.commands import errors, Bot
-import requests
-import subprocess
 import os
 from PIL import Image
 import urllib.request
@@ -22,6 +20,7 @@ intents.members = True
 # sets the command prefix for bot commands
 bot = commands.Bot(command_prefix='-', intents=intents)
 
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
 def picConverter(ctx):
     # building the opener to download user avatar
@@ -31,8 +30,8 @@ def picConverter(ctx):
     urllib.request.install_opener(opener)
 
     # downloading the image and converting it to png
-    filename = rf"E:\Code\Media\{ctx.author.name}.webp"
-    new_filename = rf"E:\Code\Media\{ctx.author.name}.png"
+    filename = rf"{dir_path}\Media\temp\{ctx.author.name}.webp"
+    new_filename = rf"{dir_path}\Media\temp\{ctx.author.name}.png"
     attachment_url = str(ctx.message.attachments[0].url)
     im = urllib.request.urlretrieve(attachment_url, filename)
     im = Image.open(filename)
@@ -176,7 +175,7 @@ class Bot():
     @bot.command(pass_context=True)
     async def NiceGuy(ctx, self=bot):
         im1 = picConverter(ctx)
-        im2 = Image.open('E:\Code\Media\MemeTP1.png')
+        im2 = Image.open(rf'{dir_path}\Media\Meme_Templates\MemeTP1.png')
 
         # scaling the second image to fit the first image
         image_size = im2.size
@@ -184,7 +183,7 @@ class Bot():
 
         # pasting the template onto the given image to create a really funny meme
         im1.paste(im2, (0, 0), im2)
-        finalpath = r'E:\Code\Media\BakedMeme.png'
+        finalpath = rf'{dir_path}\Media\temp\BakedMeme.png'
 
         # saving and sending the merged image
         im1.save(finalpath)
@@ -195,12 +194,12 @@ class Bot():
     @bot.command(pass_context=True)
     async def AverageGuy(ctx, self=bot):
         im1 = picConverter(ctx)
-        im2 = Image.open('E:\Code\Media\MemeTP2.png').convert("RGBA")
+        im2 = Image.open(rf'{dir_path}\Media\Meme_Templates\MemeTP2.png').convert("RGBA")
 
         im1 = im1.resize((635, 586))
         im2.paste(im1, (650, 135), im1)
 
-        finalpath = r'E:\Code\Media\BakedMeme2.png'
+        finalpath = rf'{dir_path}\Media\temp\BakedMeme2.png'
 
         # saving and sending the merged image
         im2.save(finalpath)
@@ -211,12 +210,12 @@ class Bot():
     @bot.command(pass_context=True)
     async def Trash(ctx, self=bot):
         im1 = picConverter(ctx)
-        im2 = Image.open('E:\Code\Media\MemeTP3.jpg').convert("RGBA")
+        im2 = Image.open(rf'{dir_path}\Media\Meme_Templates\MemeTP3.jpg').convert("RGBA")
 
         # resizing given image to fit to meme tp
         im1 = im1.resize((165, 220))
         im2.paste(im1, (55, 80), im1)
-        finalpath = r'E:\Code\Media\BakedMeme3.png'
+        finalpath = rf'{dir_path}\Media\temp\BakedMeme3.png'
 
         # saving and sending the merged image
         im2.save(finalpath)
