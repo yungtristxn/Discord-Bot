@@ -1,2 +1,4 @@
 # Discord-Bot
-first discord bot with a few simple functions
+discord bot with a few simple functions
+
+//currently using hardcoded paths
