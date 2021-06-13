@@ -77,7 +77,7 @@ class Bot():
     # sets the activity and shows all connected servers on bot startup
     @bot.event
     async def on_ready():
-        await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name='Tristan beim scheißen zu'))
+        await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name='World of Warships'))
         print(f'{bot.user} has connected to:')
         for guild in bot.guilds:
             print("Servername: " + str(guild.name) +
