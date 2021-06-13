@@ -43,7 +43,7 @@ def picConverter(ctx):
     return im
 
 
-def listTo2dArray(list):
+def listTo2dArray(list, user_x, user_0):
     n = 0
     visual = '```'
     for x in list:
@@ -58,8 +58,9 @@ def listTo2dArray(list):
 
     visual += '```'
     embed = discord.Embed(title='Wildus-Game-Bot',
-                          color=0x00ff00, timestamp=datetime.datetime.utcnow())
+                          color=0x00ff00)
     embed.add_field(name='**Tic-Tac-Toe**', value=f'{visual}')
+    embed.set_footer(text=f'{user_x}=X\n{user_0}=0')
     return embed
 
 
@@ -91,7 +92,7 @@ class Bot():
             backupchannel = bot.get_channel(self.deleted_messages_channel_id)
             # creating the embed message that contains the deleted command, the author and the server it was sent on
             deletedMessage = discord.Embed(
-                title='Overwatch', color=0x00ff00, timestamp=datetime.datetime.utcnow())
+                title='Overwatch', color=0x00ff00)
             deletedMessage.add_field(
                 name='Deleted command:', value=message.content, inline=False)
             deletedMessage.add_field(
@@ -281,99 +282,92 @@ class Bot():
         channel = ctx.message.channel  # channel the game is going to be played in
         user1 = ctx.message.author.id   # user that started the game
         user2 = user.id     # tagged user
-        userlist = [user1, user2]
 
-        # chooses a random user of the 2 that begins the round
-        first_user = random.choice(userlist)
+        # chooses a random beginner
+        current_user = random.choice([user1, user2])
 
-        ttt_array = await ctx.send(embed=listTo2dArray(number_list))
-        startmsg = await ctx.send(f"{bot.get_user(first_user).mention} beginnt mit X!")
-        current_user = first_user
-
-        if first_user == user1:
-            userlist = [first_user, user2]
+        # assinging unique names to both players
+        user_x = current_user
+        if user_x == user1:
+            user_0 = user2
         else:
-            userlist = [first_user, user1]
+            user_0 = user1
+
+        # sending messages to give the players all needed info, these will be updated during the game
+        ttt_array = await ctx.send(embed=listTo2dArray(number_list, bot.get_user(user_x).name, bot.get_user(user_0).name))
+        startmsg = await ctx.send(f"{bot.get_user(current_user).mention} begins X!")
+
         x = 9
         y = 0
         while y < x:
             def check(m):
                 return m.channel == channel and m.author.id == current_user
             try:
+                ready_message = await ctx.send('Ready for input:')
                 msg = await bot.wait_for('message', check=check, timeout=20)
+                await ready_message.delete()
             except asyncio.TimeoutError:
-                await ctx.send(f"Deine Zeit ist ausgelaufen {bot.get_user(current_user).mention}!")
+                await ctx.send(f"Your time's up! {bot.get_user(current_user).mention}!")
                 break
             await msg.delete()
             if msg.content in availabe_numbers:
                 if msg.content in number_list:
-                    if userlist.index(current_user) == 0:
+                    availabe_numbers.remove(msg.content)
+                    if current_user == user_x:
                         number_list[number_list.index(msg.content)] = "X"
                     else:
                         number_list[number_list.index(msg.content)] = "0"
 
-                    await ttt_array.edit(embed=listTo2dArray(number_list))
+                    await ttt_array.edit(embed=listTo2dArray(number_list, bot.get_user(user_x).name, bot.get_user(user_0).name))
                     y += 1
-                    availabe_numbers.remove(msg.content)
 
-                def checkRows(array):
-                    for row in array:
-                        if len(set(row)) == 1:
-                            if row[0] == "X":
-                                winner = userlist[0]
-                            else:
-                                winner = userlist[1]
+                # functions for check winner from https://stackoverflow.com/a/39923218
+                def checkBoard(array):
+                    # Rows
+                    for r in range(array):
+                        yield [(r, c) for c in range(array)]
+                    # Columns
+                    for c in range(array):
+                        yield [(r, c) for r in range(array)]
+                    # Diagonal top left to bottom right
+                    yield [(i, i) for i in range(array)]
+                    # Diagonal top right to bottom left
+                    yield [(i, array - 1 - i) for i in range(array)]
 
-                            return winner
-                        else:
-                            pass
-
-                def checkDiagonals(array):
-                    symbol = None
-                    if len(set([array[i][i] for i in range(len(array))])) == 1:
-                        symbol = array[0][0]
-                    if len(set([array[i][len(array)-i-1] for i in range(len(array))])) == 1:
-                        symbol = array[0][len(array)-1]
-                    if symbol:
-                        if symbol == "X":
-                            winner = userlist[0]
-                            return winner
-                        elif symbol == "0":
-                            winner = userlist[1]
-                            return winner
-                    else:
-                        pass
+                def is_winner(board, decorator):
+                    b_len = len(board)
+                    for indexes in checkBoard(b_len):
+                        if all(board[r][c] == decorator for r, c in indexes):
+                            return True
+                    return False
 
                 mdnumber_array = np.reshape(number_list, (-1, 3))
-                # checking if a winner exists, if winner is found ends the game and announces winner
-                winCon1 = checkRows(mdnumber_array)
-                winCon2 = checkDiagonals(mdnumber_array)
-                if winCon1:
-                    winner = winCon1
-                elif winCon2:
-                    winner = winCon2
+                if is_winner(mdnumber_array, "X") == True:
+                    winner = user_x
+                elif is_winner(mdnumber_array, "0") == True:
+                    winner = user_0
                 if winner:
                     await startmsg.delete()
-                    await ctx.send(f"{bot.get_user(winner).mention} hat gewonnen!")
+                    await ctx.send(f"{bot.get_user(winner).mention} won!")
                     break
-                # changing the user whose turn it is
-                if userlist.index(current_user) == 0:
-                    current_user = userlist[1]
-                else:
-                    current_user = userlist[0]
-                await startmsg.edit(content=f"{bot.get_user(current_user).mention} ist dran!")
 
+                # changing the user whose turn it is
+                if current_user == user_0:
+                    current_user = user_x
+                else:
+                    current_user = user_x
+                await startmsg.edit(content=f"It's {bot.get_user(current_user).mention} turn!")
             else:
-                error = await ctx.send(f"Die Stelle {msg.content} ist bereits besetzt!")
+                error = await ctx.send(f"The field {msg.content} is already occupied!")
                 await asyncio.sleep(2)
                 await error.delete()
         else:
-            error = await ctx.send(f"Die Stelle {msg.content} gibt es nicht!")
+            error = await ctx.send(f"The field {msg.content} doesn't exist!")
             await asyncio.sleep(2)
             await error.delete()
 
         if not winner:
-            await ctx.send("Das Spiel ist vorbei und keiner hat gewonnen!")
+            await ctx.send("The game is over and nobody won!")
 
 
 # initializes with file execution
