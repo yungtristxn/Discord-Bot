@@ -41,7 +41,6 @@ def picConverter(ctx):
     os.remove(new_filename)
     return im
 
-
 def listTo2dArray(list, user_x, user_0):
     n = 0
     visual = '```'
@@ -62,16 +61,11 @@ def listTo2dArray(list, user_x, user_0):
     embed.set_footer(text=f'{user_x}=X\n{user_0}=0')
     return embed
 
-
 class Bot():
     # initializing bot variables
     def __init__(self):
         self.bot = bot
-        self.bot_channel_ids = [563024724612087829,
-                                746945705142124596,
-                                826223294243012659,
-                                746945705142124596,
-                                852236803079798784]
+        self.forbidden_channel_ids = [853372174319222795]
         self.deleted_messages_channel_id = 832018754874769448
 
     # sets the activity and shows all connected servers on bot startup
@@ -87,7 +81,7 @@ class Bot():
     @bot.event
     async def on_message(message, self=bot):
         # checking if message is a command and if true, checking if it is sent into one of the given botchannels, if not the message is deleted and logged in deleted_messages_channel
-        if message.content.startswith('-') and message.channel.id not in self.bot_channel_ids:
+        if message.content.startswith('-') and message.channel.id in self.forbidden_channel_ids:
             backupchannel = bot.get_channel(self.deleted_messages_channel_id)
             # creating the embed message that contains the deleted command, the author and the server it was sent on
             deletedMessage = discord.Embed(
@@ -104,7 +98,7 @@ class Bot():
                 name='Server-ID:', value=message.guild.id, inline=False)
             await backupchannel.send(embed=deletedMessage)
             await message.delete()
-            response = await message.channel.send('Please use Wildus-Bot in bot channels only!! :)')
+            response = await message.channel.send('Using me in this channel is forbidden!')
             await asyncio.sleep(3)
             await response.delete()
         else:
@@ -147,7 +141,7 @@ class Bot():
     # delete all/given number of messages in chat
     @bot.command(pass_context=True)
     async def purge(ctx, arg=None, self=bot):
-        if ctx.author.guild_permissions.administrator:
+        if ctx.message.channel.permissions_for(ctx.message.guild.get_member(ctx.message.author.id)).administrator == True or await bot.is_owner(ctx.author) == True:
             if arg:
                 limit = int(arg)
             else:
@@ -273,6 +267,16 @@ class Bot():
         await ctx.send(embed=mlist)
 
     @bot.command()
+    async def isAdmin(ctx, member: discord.Member = None):
+        if member:
+            member = member
+        else:
+            member = ctx.message.guild.get_member(ctx.message.author.id)
+            
+        has_permission = ctx.message.channel.permissions_for(member).administrator
+        await ctx.send(f'Admin status: {has_permission}')
+
+    @bot.command()
     async def ttt(ctx, user: discord.User = None):
         winner = None
         # all possible fields that can be chosen to place either an X or an O
@@ -354,7 +358,7 @@ class Bot():
                 if current_user == user_0:
                     current_user = user_x
                 else:
-                    current_user = user_x
+                    current_user = user_0
                 await startmsg.edit(content=f"It's {bot.get_user(current_user).mention} turn!")
             else:
                 error = await ctx.send(f"The field {msg.content} is already occupied!")
