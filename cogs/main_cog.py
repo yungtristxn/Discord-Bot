@@ -10,36 +10,6 @@ class MainCog(commands.Cog):
         self.forbidden_channel_ids = [853372174319222795]
         self.deleted_messages_channel_id = 832018754874769448
 
-    # # Function that is called on every message
-    # @commands.Cog.listener()
-    # async def on_message(self, message):
-    #     # checking if message is a command and if true, checking if it is sent into one of the given botchannels, if not the message is deleted and logged in deleted_messages_channel
-    #     if message.content.startswith('-') and message.channel.id in self.forbidden_channel_ids:
-    #         backupchannel = self.bot.get_channel(
-    #             self.deleted_messages_channel_id)
-    #         # creating the embed message that contains the deleted command, the author and the server it was sent on
-    #         deletedMessage = discord.Embed(
-    #             title='Overwatch', color=0x00ff00)
-    #         deletedMessage.add_field(
-    #             name='Deleted command:', value=message.content, inline=False)
-    #         deletedMessage.add_field(
-    #             name='Author:', value=message.author, inline=False)
-    #         deletedMessage.add_field(
-    #             name='Channel:', value=message.channel, inline=False)
-    #         deletedMessage.add_field(
-    #             name='Server:', value=message.guild.name, inline=False)
-    #         deletedMessage.add_field(
-    #             name='Server-ID:', value=message.guild.id, inline=False)
-    #         await backupchannel.send(embed=deletedMessage)
-    #         await message.delete()
-    #         response = await message.channel.send('Using me in this channel is forbidden!')
-    #         await asyncio.sleep(3)
-    #         await response.delete()
-    #     elif message.author.id != 788874938139672610: #not bot himself
-    #         await self.bot.process_commands(message)
-    #     else:
-    #         pass
-
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         send = False

@@ -21,9 +21,11 @@ class Bot():
     def __init__(self, cog_list):
         self.bot = bot
         self.cog_list = cog_list
+        self.control_channel = self.bot.get_channel(855090791009091584) # id of channel that error messages and co. will be send to
+
     # sets the activity and shows all connected servers on bot startup
     @bot.event
-    async def on_ready():
+    async def on_ready(self=bot):
         await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name='World of Warships'))
         print(f'{bot.user} has connected to:')
         for guild in bot.guilds:
@@ -120,8 +122,8 @@ if __name__ == '__main__':
         for cog in cogs:
             cog_list.append(cog)
             bot.load_extension(f'cogs.{cog}')
-    except:
-        pass
+    except commands.errors.ExtensionNotFound as e:
+        print(e)
     Bot.__init__(bot, cog_list)
     # launches the bot
     bot.run(TOKEN)
