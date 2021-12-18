@@ -3,12 +3,11 @@ from discord.ext import commands
 import asyncio
 import datetime
 
-
 class MainCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.forbidden_channel_ids = [853372174319222795]
         self.deleted_messages_channel_id = 832018754874769448
+        self.limit = None
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
@@ -38,38 +37,53 @@ class MainCog(commands.Cog):
         except AttributeError:
             pass
 
-        # delete all/given number of messages in chat
+    # delete all/given number of messages in chat
     @commands.command(pass_context=True)
     async def purge(self, ctx, arg=None):
         if ctx.message.channel.permissions_for(ctx.message.guild.get_member(ctx.message.author.id)).administrator == True or await self.bot.is_owner(ctx.author) == True:
-            if arg:
-                limit = int(arg)
+            if arg and (arg == 'all' or arg =='a'):
+                def check(m):
+                    print(m)
+                    print(m.content)
+                    return m
+                try:
+                    await ctx.send('Are you sure you want to delete every message in this channel? (y/n)')
+                    msg = await self.bot.wait_for('message', check=check, timeout=20)
+                    if msg.content == "yes" or msg.content == "y":
+                        self.limit = None
+                    elif msg.content == "no" or msg.content == "n":
+                        self.limit = 0
+                    else:
+                        self.limit = 0
+                        await ctx.send("That didn't work... please try again")
+                except asyncio.TimeoutError:
+                    await ctx.send(f"You didn't answer in time, deletion canceled")
             else:
-                limit = None
-            channel = self.bot.get_channel(self.deleted_messages_channel_id)
-            deletedMessage = discord.Embed(
-                title='Channel Purger', color=0x00ff00, timestamp=datetime.datetime.now())
-            deletedMessage.add_field(
-                name='Used by:', value=ctx.message.author, inline=False)
-            deletedMessage.add_field(
-                name='In Channel:', value=ctx.message.channel, inline=False)
-            deletedMessage.add_field(
-                name='Server:', value=ctx.message.guild.name, inline=False)
-            deletedMessage.add_field(
-                name='Server-ID:', value=ctx.message.guild.id, inline=False)
-            await channel.send(embed=deletedMessage)
-            deleted = await ctx.channel.purge(limit=limit)
-            response = await ctx.channel.send(f"Successfully deleted {len(deleted)} messages!")
-            await asyncio.sleep(3)
-            await response.delete()
+                try:
+                    self.limit = int(arg)
+                except:
+                    await ctx.send("That didn't work! Please try using '-purge number'/'-purge all'")
+                    self.limit = 0
+            
+            if self.limit != 0:
+                channel = self.bot.get_channel(self.deleted_messages_channel_id)
+                deletedMessage = discord.Embed(
+                    title='Channel Purger', color=0x00ff00, timestamp=datetime.datetime.now())
+                deletedMessage.add_field(
+                    name='Used by:', value=ctx.message.author, inline=False)
+                deletedMessage.add_field(
+                    name='In Channel:', value=ctx.message.channel, inline=False)
+                deletedMessage.add_field(
+                    name='Server:', value=ctx.message.guild.name, inline=False)
+                deletedMessage.add_field(
+                    name='Server-ID:', value=ctx.message.guild.id, inline=False)
+                await channel.send(embed=deletedMessage)
+                deleted = await ctx.channel.purge(limit=self.limit)
+                response = await ctx.channel.send(f"Successfully deleted {len(deleted)} messages!")
+                await asyncio.sleep(3)
+                await response.delete()
         else:
-            await ctx.send('Du besitzt nicht die nötigen Rechte um das zu tun!')
-
-    # sends the current daytime
-    @commands.command(pass_context=True)
-    async def time(self, ctx):
-        time = str(datetime.datetime.now())[:19]
-        await ctx.send(time)
+            await ctx.send("You don't have the permissions to use this command!")
 
     # get guild icon
     @commands.command()
@@ -93,18 +107,7 @@ class MainCog(commands.Cog):
 
         await ctx.send(embed=mlist)
 
-    @commands.command()
-    async def isAdmin(self, ctx, member: discord.Member = None):
-        if member:
-            member = member
-        else:
-            member = ctx.message.guild.get_member(ctx.message.author.id)
-
-        has_permission = ctx.message.channel.permissions_for(
-            member).administrator
-        await ctx.send(f'Admin status: {has_permission}')
-        
-        # Shutdown the bot, owner only
+    # Shutdown the bot, owner only
     @commands.command(pass_context=True)
     async def shutdown(self, ctx):
         is_owner = await self.bot.is_owner(ctx.author)
@@ -122,7 +125,6 @@ class MainCog(commands.Cog):
             await ctx.send("You don't have the permissions to use this command!")
         else:
             await ctx.guild.leave()
-
 
 def setup(bot):
     bot.add_cog(MainCog(bot))

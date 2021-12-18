@@ -6,7 +6,6 @@ import os
 
 dir_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
-
 def picConverter(ctx):
     # building the opener to download user avatar
     opener = urllib.request.build_opener()
@@ -15,83 +14,63 @@ def picConverter(ctx):
     urllib.request.install_opener(opener)
 
     # downloading the image and converting it to png
-    filename = rf"{dir_path}\Media\{ctx.author.name}.webp"
-    new_filename = rf"{dir_path}\Media\{ctx.author.name}.png"
+    filename = rf"{dir_path}\Media\{ctx.author.name}.png"
     attachment_url = str(ctx.message.attachments[0].url)
     im = urllib.request.urlretrieve(attachment_url, filename)
     im = Image.open(filename)
-    im.save(new_filename, format="png")
-    im = Image.open(new_filename).convert("RGBA")
-    os.remove(filename)
-    os.remove(new_filename)
-    return im
-
+    return im, filename
 
 class MemeCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.meme_count = ["1","2","3"]
+        self.meme_names = ["NiceGuy","AverageGuy","Trash"]
+        self.meme_sizes = [(640,677),(645,586),(165,220)]
+        self.meme_positions = [(0,0),(650,135),(55,80)]
 
-    # meme maker N.1
     @commands.command(pass_context=True)
-    async def NiceGuy(self, ctx):
-        im1 = picConverter(ctx)
-        im2 = Image.open(rf'{dir_path}\Media\Meme_Templates\MemeTP1.png')
+    async def meme(self,ctx,meme_nr=None):
+        if meme_nr != None and meme_nr in self.meme_count or meme_nr in self.meme_names:
+            if meme_nr in self.meme_count:
+                meme_nr = int(meme_nr)
+            elif meme_nr in self.meme_names:
+                meme_nr = self.meme_names.index(meme_nr)+1
+                print(meme_nr)
+            image, filename = picConverter(ctx)
+            meme_template = Image.open(rf'{dir_path}\Media\Meme_Templates\MemeTP{meme_nr}.png')
+            template_size = self.meme_sizes[meme_nr-1]
+            x,y = self.meme_positions[meme_nr-1]
 
-        # scaling the second image to fit the first image
-        image_size = im2.size
-        im1 = im1.resize(image_size)
+            # scaling image to fit the template
+            image = image.resize(template_size)
 
-        # pasting the template onto the given image to create a really funny meme
-        im1.paste(im2, (0, 0), im2)
-        finalpath = rf'{dir_path}\Media\BakedMeme.png'
-
-        # saving and sending the merged image
-        im1.save(finalpath)
-        await ctx.send(file=discord.File(finalpath))
-        os.remove(finalpath)
-
-    # Meme N.2
-    @commands.command(pass_context=True)
-    async def AverageGuy(self, ctx):
-        im1 = picConverter(ctx)
-        im2 = Image.open(
-            rf'{dir_path}\Media\Meme_Templates\MemeTP2.png').convert("RGBA")
-
-        im1 = im1.resize((635, 586))
-        im2.paste(im1, (650, 135), im1)
-
-        finalpath = rf'{dir_path}\Media\BakedMeme2.png'
-
-        # saving and sending the merged image
-        im2.save(finalpath)
-        await ctx.send(file=discord.File(finalpath))
-        os.remove(finalpath)
-
-    # Meme N.3
-    @commands.command(pass_context=True)
-    async def Trash(self, ctx):
-        im1 = picConverter(ctx)
-        im2 = Image.open(
-            rf'{dir_path}\Media\Meme_Templates\MemeTP3.jpg').convert("RGBA")
-
-        # resizing given image to fit to meme tp
-        im1 = im1.resize((165, 220))
-        im2.paste(im1, (55, 80), im1)
-        finalpath = rf'{dir_path}\Media\BakedMeme3.png'
-
-        # saving and sending the merged image
-        im2.save(finalpath)
-        await ctx.send(file=discord.File(finalpath))
-        os.remove(finalpath)
+            # pasting the template onto the given image to create a really funny meme
+            final_path = rf'{dir_path}\Media\BakedMeme.png'
+            if meme_nr == 1:
+                image.paste(meme_template,(x,y),meme_template)
+                image.save(final_path)
+            else:
+                meme_template.paste(image,(x,y),image)
+                meme_template.save(final_path)
+            
+            await ctx.send(file=discord.File(final_path))
+            os.remove(final_path)
+            os.remove(filename)
+            
+        else:
+            await ctx.send(f"Please try using a name or a number from following lists:\t{self.meme_names}\t{self.meme_count}")
 
     # Send avatar of mentioned user
     @commands.command()
-    async def avatar(ctx, user: discord.User = None):
-        if user != None:
-            await ctx.send(user.avatar_url)
+    async def avatar(self, ctx, user = None):
+        if user:
+            try:
+                user = await self.bot.fetch_user(user)
+                await ctx.send(user.avatar_url)
+            except:
+                await ctx.send("Invalid User ID")
         else:
             await ctx.send(ctx.author.avatar_url)
-
 
 def setup(bot):
     bot.add_cog(MemeCog(bot))
