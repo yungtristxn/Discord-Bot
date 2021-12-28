@@ -15,16 +15,16 @@ class MainCog(commands.Cog):
         logchannel = self.bot.get_channel(832019802264305694)
         try:
             if before.channel == after.channel:
-                description = f'**{member.mention} has started/stopped their stream! '
+                description = f'{member.mention} has started/stopped their stream! '
                 send = True
             elif before.channel == None and after.channel != None:
-                description = f'**{member.mention} has joined {after.channel}**'
+                description = f'{member.mention} has joined {after.channel}'
                 send = True
             elif before.channel != None and after.channel == None:
-                description = f'**{member.mention} has left {before.channel}**'
+                description = f'{member.mention} has left {before.channel}'
                 send = True
             elif before.channel != None and after.channel != None:
-                description = f'**{member.mention} went from {before.channel} to {after.channel}'
+                description = f'{member.mention} went from {before.channel} to {after.channel}'
                 send = True
             else:
                 pass
