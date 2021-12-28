@@ -43,8 +43,6 @@ class MainCog(commands.Cog):
         if ctx.message.channel.permissions_for(ctx.message.guild.get_member(ctx.message.author.id)).administrator == True or await self.bot.is_owner(ctx.author) == True:
             if arg and (arg == 'all' or arg =='a'):
                 def check(m):
-                    print(m)
-                    print(m.content)
                     return m
                 try:
                     await ctx.send('Are you sure you want to delete every message in this channel? (y/n)')
@@ -93,19 +91,6 @@ class MainCog(commands.Cog):
             await ctx.send(guild.icon_url)
         except discord.errors.HTTPException:
             await ctx.send('This server has no icon!')
-            
-    @commands.command()
-    async def mlist(self, ctx):
-        mlist = discord.Embed(description="**Memberlist**",
-                              color=0x00ff00, timestamp=datetime.datetime.utcnow())
-        mlist.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
-        mlist.set_footer(text=str(ctx.author.guild.name))
-
-        for member in ctx.guild.members:
-            mlist.add_field(
-                name=f'**{member.name}**', value=f'Joined Server: ```{str(member.joined_at)[:19]}```Joined Discord: ```{member.created_at}```', inline=True)
-
-        await ctx.send(embed=mlist)
 
     # Shutdown the bot, owner only
     @commands.command(pass_context=True)

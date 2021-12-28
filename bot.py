@@ -48,7 +48,7 @@ class Bot():
 if __name__ == '__main__':
     # setting up bot
     cogs_file = open(fr'{dir_path}\cogs\cogs.txt', 'r+')
-    cogs = cogs_file.read().split(' ')
+    cogs = cogs_file.read().split(',')
     print(cogs)
     cogs_file.close()
     cog_list = []
@@ -58,7 +58,7 @@ if __name__ == '__main__':
             print(cog)
             bot.load_extension(f'cogs.{cog}')
     except commands.errors.ExtensionNotFound as e:
-        print(e)
+        pass
     Bot.__init__(bot, cog_list)
     # launches the bot
     bot.run(TOKEN)

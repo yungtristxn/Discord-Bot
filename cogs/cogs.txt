@@ -1,1 +1,1 @@
-main_cog meme_cog
+main_cog,meme_cog
