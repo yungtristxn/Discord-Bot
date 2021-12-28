@@ -3,8 +3,17 @@ import discord
 from PIL import Image
 import urllib.request
 import os
+import platform
+
+if platform.system() == 'Linux':
+    system = 'Linux'
+elif platform.system() == 'Windows':
+    system = 'Windows'
+else:
+    quit()
 
 dir_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+
 
 def picConverter(ctx):
     # building the opener to download user avatar
@@ -14,7 +23,10 @@ def picConverter(ctx):
     urllib.request.install_opener(opener)
 
     # downloading the image and converting it to png
-    filename = rf"{dir_path}\Media\{ctx.author.name}.png"
+    if platform == 'Linux':
+        filename = rf"{dir_path}/Media/{ctx.author.name}.png"
+    elif platform == 'Windows':
+        filename = rf"{dir_path}\\Media\\{ctx.author.name}.png"
     attachment_url = str(ctx.message.attachments[0].url)
     im = urllib.request.urlretrieve(attachment_url, filename)
     im = Image.open(filename)
@@ -37,7 +49,10 @@ class MemeCog(commands.Cog):
                 meme_nr = self.meme_names.index(meme_nr)+1
                 print(meme_nr)
             image, filename = picConverter(ctx)
-            meme_template = Image.open(rf'{dir_path}\Media\Meme_Templates\MemeTP{meme_nr}.png')
+            if system == 'Linux':
+                meme_template = Image.open(rf'{dir_path}/Media/Meme_Templates/MemeTP{meme_nr}.png')
+            elif system == 'Windows':
+                meme_template = Image.open(rf'{dir_path}\\Media\\Meme_Templates\\MemeTP{meme_nr}.png')
             template_size = self.meme_sizes[meme_nr-1]
             x,y = self.meme_positions[meme_nr-1]
 
@@ -45,7 +60,10 @@ class MemeCog(commands.Cog):
             image = image.resize(template_size)
 
             # pasting the template onto the given image to create a really funny meme
-            final_path = rf'{dir_path}\Media\BakedMeme.png'
+            if system == 'Linux':
+                final_path = rf'{dir_path}/Media/BakedMeme.png'
+            elif system == 'Windows':
+                final_path = rf'{dir_path}\\Media\\BakedMeme.png'
             if meme_nr == 1:
                 image.paste(meme_template,(x,y),meme_template)
                 image.save(final_path)

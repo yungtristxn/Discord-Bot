@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import os
 from dotenv import load_dotenv
+import platform
 # very private bot token q-_-p
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -12,7 +13,7 @@ intents.members = True
 # sets the command prefix for bot commands
 bot = commands.Bot(command_prefix='-', intents=intents)
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
+dir_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
 class Bot():
     # initializing bot variables
@@ -46,7 +47,12 @@ class Bot():
 # initializes with file execution
 if __name__ == '__main__':
     # setting up bot
-    cogs_file = open(fr'{dir_path}\cogs\cogs.txt', 'r+')
+    if platform.system() == 'Linux':
+        cogs_file = open(fr'{dir_path}/Discord-Bot/cogs/cogs.txt', 'r+')
+    elif platform.system() == 'Windows':
+        cogs_file = open(fr'{dir_path}\\Discord-Bot\\cogs\\cogs.txt', 'r+')
+    else:
+        quit()
     cogs = cogs_file.read().split(',')
     cogs_file.close()
     try:
