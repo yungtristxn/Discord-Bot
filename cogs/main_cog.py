@@ -15,7 +15,8 @@ class MainCog(commands.Cog):
         logchannel = self.bot.get_channel(832019802264305694)
         try:
             if before.channel == after.channel:
-                pass
+                description = f'**{member.mention} has started/stopped their stream! '
+                send = True
             elif before.channel == None and after.channel != None:
                 description = f'**{member.mention} has joined {after.channel}**'
                 send = True
