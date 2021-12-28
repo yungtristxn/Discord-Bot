@@ -23,9 +23,9 @@ def picConverter(ctx):
     urllib.request.install_opener(opener)
 
     # downloading the image and converting it to png
-    if platform == 'Linux':
+    if system == 'Linux':
         filename = rf"{dir_path}/Media/{ctx.author.name}.png"
-    elif platform == 'Windows':
+    elif system == 'Windows':
         filename = rf"{dir_path}\\Media\\{ctx.author.name}.png"
     attachment_url = str(ctx.message.attachments[0].url)
     im = urllib.request.urlretrieve(attachment_url, filename)
