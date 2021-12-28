@@ -16,9 +16,8 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class Bot():
     # initializing bot variables
-    def __init__(self, cog_list):
+    def __init__(self):
         self.bot = bot
-        self.cog_list = cog_list
         self.control_channel = self.bot.get_channel(855090791009091584) # id of channel that error messages and logs will be send to
 
     # sets the activity and shows all connected servers on bot startup
@@ -49,16 +48,12 @@ if __name__ == '__main__':
     # setting up bot
     cogs_file = open(fr'{dir_path}\cogs\cogs.txt', 'r+')
     cogs = cogs_file.read().split(',')
-    print(cogs)
     cogs_file.close()
-    cog_list = []
     try:
         for cog in cogs:
-            cog_list.append(cog)
-            print(cog)
             bot.load_extension(f'cogs.{cog}')
     except commands.errors.ExtensionNotFound as e:
         pass
-    Bot.__init__(bot, cog_list)
+    Bot.__init__(bot)
     # launches the bot
     bot.run(TOKEN)
