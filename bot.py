@@ -15,6 +15,8 @@ bot = commands.Bot(command_prefix='-', intents=intents)
 
 dir_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
+cog_list = []
+
 class Bot():
     # initializing bot variables
     def __init__(self):
@@ -40,7 +42,7 @@ class Bot():
             help_embed.add_field(name='Use one of the following arguments:', value='-cog reload')
             await ctx.send(embed=help_embed)
         elif type == 'reload':
-            for cog in self.cog_list:
+            for cog in cog_list:
                 bot.reload_extension(f'cogs.{cog}')
             await ctx.send('All cogs succesfully reloaded!')
 
@@ -58,6 +60,7 @@ if __name__ == '__main__':
     try:
         for cog in cogs:
             bot.load_extension(f'cogs.{cog}')
+            cog_list.append(cog)
     except commands.errors.ExtensionNotFound as e:
         pass
     Bot.__init__(bot)

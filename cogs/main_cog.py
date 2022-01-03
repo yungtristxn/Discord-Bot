@@ -59,7 +59,7 @@ class MainCog(commands.Cog):
                     await ctx.send(f"You didn't answer in time, deletion canceled")
             else:
                 try:
-                    self.limit = int(arg)
+                    self.limit = int(arg)+1
                 except:
                     await ctx.send("That didn't work! Please try using '-purge number'/'-purge all'")
                     self.limit = 0
