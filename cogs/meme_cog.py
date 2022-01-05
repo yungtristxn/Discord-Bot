@@ -82,11 +82,16 @@ class MemeCog(commands.Cog):
     @commands.command()
     async def avatar(self, ctx, user = None):
         if user:
+            if '@' in user:
+                user = user[3:][:-1]
+            else:
+                pass
             try:
                 user = await self.bot.fetch_user(user)
                 await ctx.send(user.avatar_url)
             except:
                 await ctx.send("Invalid User ID")
+                return
         else:
             await ctx.send(ctx.author.avatar_url)
 
