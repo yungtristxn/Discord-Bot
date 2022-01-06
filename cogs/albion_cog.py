@@ -57,10 +57,10 @@ class AlbionCog(commands.Cog):
             total_victimDeathfame = 0
 
             for killfame in killdata:
-                recent_killfame = killfame["Killer"]["KillFame"]
-                total_victimDeathfame = killfame["TotalVictimKillFame"]
+                recent_killfame += killfame["Killer"]["KillFame"]
+                total_victimDeathfame += killfame["TotalVictimKillFame"]
             for deathfame in deathdata:
-                recent_deathfame = deathfame["Victim"]["DeathFame"]
+                recent_deathfame += deathfame["Victim"]["DeathFame"]
 
             embed = discord.Embed(
                 title=f"Recent K/D ratio of {killfame['Killer']['Name']}",
