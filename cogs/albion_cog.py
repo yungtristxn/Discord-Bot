@@ -6,7 +6,9 @@ from dateutil import parser
 
 def getPlayerId(playername):
     response = requests.get(
-        f"https://gameinfo.albiononline.com/api/gameinfo/search?q={playername}"
+        f"https://gameinfo.albiononline.com/api/gameinfo/search?q={playername}",
+        verify=False,
+        timeout=15
     )
     try:
         id = response.json()["players"][0]["Id"]
@@ -21,7 +23,9 @@ def getPlayerInfo(playername):
         return "error"
     else:
         response = requests.get(
-            f"https://gameinfo.albiononline.com/api/gameinfo/players/{id}"
+            f"https://gameinfo.albiononline.com/api/gameinfo/players/{id}",
+            verify=False,
+            timeout=15
         )
         if response.status_code == 404:
             return "error"
@@ -46,10 +50,14 @@ class AlbionCog(commands.Cog):
         playerId = getPlayerId(ctx.message.content[8:])
         if playerId != "error":
             killdata = requests.get(
-                f"https://gameinfo.albiononline.com/api/gameinfo/players/{playerId}/kills"
+                f"https://gameinfo.albiononline.com/api/gameinfo/players/{playerId}/kills",
+                verify=False,
+                timeout=15
             ).json()
             deathdata = requests.get(
-                f"https://gameinfo.albiononline.com/api/gameinfo/players/{playerId}/deaths"
+                f"https://gameinfo.albiononline.com/api/gameinfo/players/{playerId}/deaths",
+                verify=False,
+                timeout=15
             ).json()
 
             recent_killfame = 0
@@ -92,7 +100,10 @@ class AlbionCog(commands.Cog):
     async def recentG(self, ctx):
         pInput = ctx.message.content[9:]
         response = requests.get(
-            f"https://gameinfo.albiononline.com/api/gameinfo/search?q={pInput}")
+            f"https://gameinfo.albiononline.com/api/gameinfo/search?q={pInput}",
+            verify=False,
+            timeout=15
+        )
         if response.status_code != 404:
             data = response.json()
 
@@ -108,7 +119,9 @@ class AlbionCog(commands.Cog):
                     return
 
             event_response = requests.get(
-                f"https://gameinfo.albiononline.com/api/gameinfo/events?limit=9&offset=0&guildId={guildId}")
+                f"https://gameinfo.albiononline.com/api/gameinfo/events?limit=9&offset=0&guildId={guildId}",
+                verify=False,
+                timeout=15)
             if event_response.status_code != 404:
                 data = event_response.json()
 
